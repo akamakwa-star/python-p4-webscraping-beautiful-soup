@@ -1,32 +1,37 @@
+
 from bs4 import BeautifulSoup
 import requests
 
-# Add headers to avoid 403 Forbidden errors
+# 1️⃣ Define headers to avoid 403 Forbidden errors
 headers = {'user-agent': 'my-app/0.0.1'}
 
-# -------------------------------
-# SCRAPE MAIN PAGE HEADING
-# -------------------------------
-url = "https://flatironschool.com/"
+# 2️⃣ Target URL (Flatiron School courses page)
+url = "https://flatironschool.com/our-courses/"
 response = requests.get(url, headers=headers)
 
+# 3️⃣ Parse the HTML
 doc = BeautifulSoup(response.text, 'html.parser')
 
-# Get the main heading text
-heading = doc.select('.heading-financier')[0].contents[0].strip()
-print("Main Heading:")
-print(heading)
+# 4️⃣ Select all course containers
+# Inspect the site to find a reliable CSS selector
+course_elements = doc.select('.course-card')  # Each course is inside a div with class "course-card"
 
-# -------------------------------
-# SCRAPE COURSE TITLES
-# -------------------------------
-courses_url = "https://flatironschool.com/our-courses/"
-courses_response = requests.get(courses_url, headers=headers)
+# 5️⃣ Extract and print course info
+for course in course_elements:
+    # Course title
+    title_tag = course.select_one('.course-card__title')
+    title = title_tag.get_text(strip=True) if title_tag else "No title"
 
-courses_doc = BeautifulSoup(courses_response.text, 'html.parser')
+    # Course description
+    desc_tag = course.select_one('.course-card__description')
+    description = desc_tag.get_text(strip=True) if desc_tag else "No description"
 
-courses = courses_doc.select('.heading-60-black.color-black.mb-20')
+    # Course URL
+    link_tag = course.select_one('a')
+    link = link_tag['href'] if link_tag else "No URL"
 
-print("\nCourses Offered:")
-for course in courses:
-    print(course.contents[0].strip())
+    # Print info
+    print("Title:", title)
+    print("Description:", description)
+    print("URL:", link)
+    print("-" * 50)
